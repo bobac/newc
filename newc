@@ -6,7 +6,7 @@ function usage() {
 }
 
 function project_exists() {
-  echo "Project $1 already exists."
+  echo "Project $PROJECT already exists."
   exit 1000
 }
 
@@ -17,11 +17,20 @@ function make_dirs() {
 
   mkdir $PROJECT
   mkdir $PROJECT/src
-  mkdir $PROJECT/lib
   mkdir $PROJECT/obj
   mkdir $PROJECT/bin
   mkdir -p $PROJECT/tests/bin
 }
+
+function create_main() {
+cat >$PROJECT/src/main.c << EOF
+
+int main(int argc, char **argv) {
+
+}
+EOF
+}
+
 
 function create_makefile() {
   TAB="$(printf '\t')"
@@ -29,8 +38,49 @@ cat >$PROJECT/Makefile << EOF
 CC=$CC
 CFLAGS=-g -Wall
 
-obj/%.o: src/%.c
+SRC=src
+OBJ=obj
+SRCS=\$(wildcard \$(SRC)/*.c)
+OBJS=\$(patsubst \$(SRC)/%.c, \$(OBJ)/%.o, \$(SRCS))
+
+BIN=bin/main
+
+all:\$(BIN)
+
+\$(BIN): \$(OBJS)
+${TAB}\$(CC) \$(CFLAGS) \$(OBJS) -o \$@
+
+\$(OBJ)/%.o: \$(SRC)/%.c
 ${TAB}\$(CC) \$(CFLAGS) -c \$< -o \$@
+
+clean:
+${TAB}rm -rf bin/* obj/* tests/bin/*
+EOF
+}
+
+function create_gitignore() {
+cat >$PROJECT/.gitignore << EOF
+/bin
+/obj
+/tests/bin
+EOF
+}
+
+function create_readme() {
+cat >$PROJECT/README.md << EOF
+# $PROJECT
+
+## Dependencies
+
+## Installation
+
+## Usage
+
+## Building
+
+## Testing
+
+...
 EOF
 }
 
@@ -68,4 +118,7 @@ echo "Library path = ${LIBPATH}"
 
 PROJECT=$1
 make_dirs
+create_main
 create_makefile
+create_gitignore
+create_readme

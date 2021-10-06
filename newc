@@ -1,0 +1,71 @@
+#!/bin/bash
+
+function usage() {
+  echo "Usage: $0 [-l|--lib <lib path>] [-c|--cc <compiler>] <project_name>"
+  exit -1
+}
+
+function project_exists() {
+  echo "Project $1 already exists."
+  exit 1000
+}
+
+function make_dirs() {
+  if [[ -d $PROJECT ]]; then
+    project_exists
+  fi
+
+  mkdir $PROJECT
+  mkdir $PROJECT/src
+  mkdir $PROJECT/lib
+  mkdir $PROJECT/obj
+  mkdir $PROJECT/bin
+  mkdir -p $PROJECT/tests/bin
+}
+
+function create_makefile() {
+  TAB="$(printf '\t')"
+cat >$PROJECT/Makefile << EOF
+CC=$CC
+CFLAGS=-g -Wall
+
+obj/%.o: src/%.c
+${TAB}\$(CC) \$(CFLAGS) -c \$< -o \$@
+EOF
+}
+
+if [[ $# -eq 0 ]]; then
+  usage
+fi
+
+CC="gcc"
+POSITIONAL=()
+while [[ $# -gt 0 ]]; do
+  key="$1"
+
+  case $key in
+    -l|--lib)
+      LIBPATH="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    -c|--cc)
+      CC="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    *)    # unknown option
+      POSITIONAL+=("$1") # save it in an array for later
+      shift # past argument
+      ;;
+  esac
+done
+
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+echo "C compiler = ${CC}"
+echo "Library path = ${LIBPATH}"
+
+PROJECT=$1
+make_dirs
+create_makefile

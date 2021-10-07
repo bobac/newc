@@ -37,7 +37,7 @@ function create_makefile() {
 cat >$PROJECT/Makefile << EOF
 CC=$CC
 CFLAGS=-Isrc/ -g -Wall
-CFLAGS_TEST=-I../src/ -g -Wall
+CFLAGS_TEST=-I\$(CURDIR)/src/ -g -Wall
 
 SRC=src
 OBJ=obj
@@ -61,7 +61,7 @@ ${TAB}\$(CC) \$(CFLAGS) \$(OBJS) -o \$@
 ${TAB}\$(CC) \$(CFLAGS) -c \$< -o \$@
 
 \$(TEST)/bin/%.o: \$(SRC)/%.c
-${TAB}\$(CC) \$(CFLAGS_TEST) -c \$< -o \$@
+${TAB}\$(CC) \$(CFLAGS) -c \$< -o \$@
 
 \$(TEST)/bin/%: \$(TEST)/%.c
 ${TAB}\$(CC) \$(CFLAGS_TEST) \$(TESTOBJS) \$< -o \$@ -lcriterion
@@ -106,6 +106,18 @@ cat > $FILE <<EOF
 EOF
 }
 
+function create_test_file() {
+  FILE=$1
+cat > $FILE << EOF
+#include <criterion/criterion.h>
+
+#include "unit/moje.h"
+
+Test(mojetests, othervalue) {
+    cr_expect(othervalue() == 1, "myvalue() should return 2");
+}
+EOF
+}
 function create_project_file() {
   F=$1
   echo "F=$F"
@@ -126,12 +138,16 @@ function create_project_file() {
   if [[ -z $PATH_PART ]]; then
     SRC_PATH_PART=src
     OBJ_PATH_PART=obj
+    TEST_PATH_PART=tests
+    TESTOBJ_PATH_PART=tests/bin
   else
     SRC_PATH_PART=src/$PATH_PART
     OBJ_PATH_PART=obj/$PATH_PART
+    TEST_PATH_PART=tests/$PATH_PART
+    TESTOBJ_PATH_PART=tests/bin/$PATH_PART
   fi
 
-  mkdir -p $SRC_PATH_PART $OBJ_PATH_PART
+  mkdir -p $SRC_PATH_PART $OBJ_PATH_PART $TEST_PATH_PART $TESTOBJ_PATH_PART
 
   #if creating a C file, create %.c and %.h combo
   if [ $EXT_PART = "c" ]; then
@@ -142,6 +158,9 @@ function create_project_file() {
     echo "inserting #ifndef guards..."
     N=$(echo $NAME_PART | tr '[:lower:]' '[:upper:]')
     create_header_file $SRC_PATH_PART/$NAME_PART.h "${N}_H"
+
+    #create criterion tests
+    create_test_file $TEST_PATH_PART/test_$NAME_PART.c
 
   else
     echo "creating $SRC_PATH_PART/$NAME_PART.$EXT_PART"

@@ -108,16 +108,24 @@ EOF
 
 function create_test_file() {
   FILE=$1
+  INCL=$2
+  UNIT=$3
 cat > $FILE << EOF
 #include <criterion/criterion.h>
 
-#include "unit/moje.h"
+#include "$INCL"
 
-Test(mojetests, othervalue) {
-    cr_expect(othervalue() == 1, "myvalue() should return 2");
+Test($UNIT, default) {
+    cr_expect(1 == 1, "Default $UNIT passing test.");
+    cr_expect(1 != 1, "Default $UNIT failing test.");
 }
 EOF
 }
+
+function join_path() {
+    echo "${1:+$1/}$2" | sed 's#//#/#g'
+}
+
 function create_project_file() {
   F=$1
   echo "F=$F"
@@ -156,11 +164,14 @@ function create_project_file() {
 
     echo "creating $SRC_PATH_PART/$NAME_PART.h"
     echo "inserting #ifndef guards..."
-    N=$(echo $NAME_PART | tr '[:lower:]' '[:upper:]')
+    if [[ ! -z $RELATIVE_PATH_PART ]]; then 
+      GUARD_PREFIX=$(echo ${RELATIVE_PATH_PART} | sed 's:/:_:g')
+    fi
+    N=$(echo "${GUARD_PREFIX}${NAME_PART}" | tr '[:lower:]' '[:upper:]')
     create_header_file $SRC_PATH_PART/$NAME_PART.h "${N}_H"
 
     #create criterion tests
-    create_test_file $TEST_PATH_PART/test_$NAME_PART.c
+    create_test_file $TEST_PATH_PART/test_$NAME_PART.c $RELATIVE_PATH_PART$NAME_PART.h ${N}
 
   else
     echo "creating $SRC_PATH_PART/$NAME_PART.$EXT_PART"

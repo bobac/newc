@@ -122,3 +122,6 @@ If you want to build your project, nothing easier than invoking `make`. If you w
 There are not that many future plans as this was a hobby project for me over couple of evenings and main aim was to decipher a bit cryptic makefiles. I can imagine that I can add a switch that might remove the testsuite generation but not sure whther it worths it - the testing is a really good practice and anyway, if you even do not have your Criterion installed the make file would still work (minus `make test`).
 
 Another topic might be adding libraries support and shared libraries support, time will show.
+
+## Note
+`newc` uses `.newc` file in the root of the project. The content is not important, it's sole use is for the script to know if it is invoked in a project directory or not. If not, `newc something` will create a directory `something/` and puts a newly generated project there. If it is in a directory that already contains .newc file, it will add the source(s) into `src/` instead and generate their appropriate contents.

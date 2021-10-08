@@ -128,20 +128,15 @@ function join_path() {
 
 function create_project_file() {
   F=$1
-  echo "F=$F"
   PATH_PART=${F%/*}
   RELATIVE_PATH_PART="$PATH_PART/"
   if [ $F = $PATH_PART ]; then #resolve issue when presented just with plain file name with no path
     PATH_PART=""
     RELATIVE_PATH_PART=""
   fi
-  echo "P=$PATH_PART"
   BASE_PART=${F##*/}
-  echo "B=$BASE_PART"
   EXT_PART=${BASE_PART##*.}
-  echo "E=$EXT_PART"
   NAME_PART=${BASE_PART%.*}
-  echo "N=$NAME_PART"
 
   if [[ -z $PATH_PART ]]; then
     SRC_PATH_PART=src
@@ -171,6 +166,7 @@ function create_project_file() {
     create_header_file $SRC_PATH_PART/$NAME_PART.h "${N}_H"
 
     #create criterion tests
+    echo "creating $TEST_PATH_PART/test_$NAME_PART.c"
     create_test_file $TEST_PATH_PART/test_$NAME_PART.c $RELATIVE_PATH_PART$NAME_PART.h ${N}
 
   else
@@ -221,11 +217,6 @@ while [[ $# -gt 0 ]]; do
   key="$1"
 
   case $key in
-    -l|--lib)
-      LIBPATH="$2"
-      shift # past argument
-      shift # past value
-      ;;
     -c|--cc)
       CC="$2"
       shift # past argument
@@ -244,7 +235,6 @@ if [[ ! -f ".newc" ]]; then
   PROJECT=$1
   echo "Creating new C project in $PROJECT/"
   echo "C compiler = ${CC}"
-  echo "Library path = ${LIBPATH}"
 
   make_dirs
   create_main

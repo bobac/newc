@@ -118,6 +118,14 @@ Don worry about the failing tests, it is OK, the test templates were deliberatel
 
 If you want to build your project, nothing easier than invoking `make`. If you want to clean your build artefacts, just type `make clean`. And that's all folks!
 
+## Command-line switches
+`newc` uses only one switch:
+`-c|--cc <compiler>` sets compiler used by the build system that is placed into the Makefile. Relevant only when creating a new project. It is ignored when adding project sources.
+### Examples
+`newc -c gcc project1` will create `project1` that uses `gcc` as compiler.
+
+`newc -c clang project2` will create `project2` that uses `clang` compiler instead.
+
 ## ToDo
 There are not that many future plans as this was a hobby project for me over couple of evenings and main aim was to decipher a bit cryptic makefiles. I can imagine that I can add a switch that might remove the testsuite generation but not sure whther it worths it - the testing is a really good practice and anyway, if you even do not have your Criterion installed the make file would still work (minus `make test`).
 

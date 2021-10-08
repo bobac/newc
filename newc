@@ -50,7 +50,7 @@ TESTS=\$(wildcard \$(TEST)/*.c) \$(wildcard \$(TEST)/*/*.c)
 TESTOBJS=\$(patsubst \$(SRC)/%.c, \$(TEST)/bin/%.o, \$(TESTSRCS))
 TESTBINS=\$(patsubst \$(TEST)/%.c, \$(TEST)/bin/%, \$(TESTS))
 
-BIN=bin/main
+BIN=bin/$PROJECT
 
 all:\$(BIN)
 
